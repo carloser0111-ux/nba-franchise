@@ -12,52 +12,14 @@
 
     h1 { color: gold; }
 
-    .menu button {
-      padding:12px 20px;
-      margin:8px;
-      border:none;
-      border-radius:8px;
-      background:gold;
-      font-weight:bold;
-      cursor:pointer;
-      transition:0.2s;
-    }
-
-    .menu button:hover {
-      transform:scale(1.1);
-    }
-
-    .grid {
-      display:flex;
-      flex-wrap:wrap;
-      justify-content:center;
-      gap:15px;
-      margin-top:20px;
-    }
-
-    .card {
-      background:#1c1c1c;
-      padding:15px;
-      width:160px;
-      border-radius:12px;
-      box-shadow:0 0 10px rgba(255,215,0,0.3);
-      transition:0.2s;
-      cursor:pointer;
-    }
-
-    .card:hover {
-      transform:scale(1.05);
-    }
-
-    img {
-      width:90px;
-      border-radius:10px;
-    }
-
-    .rating {
-      color:gold;
-      font-weight:bold;
-      font-size:20px;
+  <div class="menu">
+  <button onclick="showTeams()">Teams</button>
+  <button onclick="viewRoster()">Roster</button>
+  <button onclick="showStandings()">Standings</button>
+  <button onclick="showPlayoffs()">Playoffs</button>
+  <button onclick="tradeMenu()">Trade</button>
+  <button onclick="simSeason()">Sim Season</button>
+</div>
     }
   </style>
 </head>

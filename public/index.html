@@ -12,15 +12,38 @@
 
     h1 { color: gold; }
 
-  <div class="menu">
-  <button onclick="showTeams()">Teams</button>
-  <button onclick="viewRoster()">Roster</button>
-  <button onclick="showStandings()">Standings</button>
-  <button onclick="showPlayoffs()">Playoffs</button>
-  <button onclick="tradeMenu()">Trade</button>
-  <button onclick="simSeason()">Sim Season</button>
-</div>
+    .menu button {
+      padding:10px 15px;
+      margin:5px;
+      border:none;
+      border-radius:8px;
+      background:gold;
+      font-weight:bold;
+      cursor:pointer;
     }
+
+    .grid {
+      display:flex;
+      flex-wrap:wrap;
+      justify-content:center;
+      gap:15px;
+      margin-top:20px;
+    }
+
+    .card {
+      background:#1c1c1c;
+      padding:10px;
+      width:150px;
+      border-radius:12px;
+      box-shadow:0 0 10px rgba(255,215,0,0.3);
+      cursor:pointer;
+    }
+
+    .card:hover { transform:scale(1.05); }
+
+    img { width:80px; border-radius:8px; }
+
+    .rating { color:gold; font-weight:bold; }
   </style>
 </head>
 <body>
@@ -28,9 +51,12 @@
 <h1>🏀 NBA MyLEAGUE</h1>
 
 <div class="menu">
-  <button onclick="showTeams()">Choose Team</button>
+  <button onclick="showTeams()">Teams</button>
   <button onclick="viewRoster()">Roster</button>
-  <button onclick="simGame()">Sim Game</button>
+  <button onclick="showStandings()">Standings</button>
+  <button onclick="showPlayoffs()">Playoffs</button>
+  <button onclick="tradeMenu()">Trade</button>
+  <button onclick="simSeason()">Sim Season</button>
 </div>
 
 <h2 id="teamName"></h2>
@@ -40,240 +66,203 @@
 
 <script>
 
-// -------- TEAMS --------
+// --- TEAMS (sample but expandable) ---
 let teams = [
-
-{ name:"Lakers", logo:"https://cdn.nba.com/logos/nba/1610612747/global/L/logo.svg",
+{
+name:"Lakers",
+logo:"https://cdn.nba.com/logos/nba/1610612747/global/L/logo.svg",
 players:[
 {name:"LeBron James",rating:96,img:"https://cdn.nba.com/headshots/nba/latest/1040x760/2544.png"},
 {name:"Anthony Davis",rating:92,img:"https://cdn.nba.com/headshots/nba/latest/1040x760/203076.png"},
 {name:"Austin Reaves",rating:86,img:"https://cdn.nba.com/headshots/nba/latest/1040x760/1630559.png"},
 {name:"Rui Hachimura",rating:82,img:"https://cdn.nba.com/headshots/nba/latest/1040x760/1629060.png"},
 {name:"D'Angelo Russell",rating:84,img:"https://cdn.nba.com/headshots/nba/latest/1040x760/1626156.png"}
-]},
-
-{ name:"Warriors", logo:"https://cdn.nba.com/logos/nba/1610612744/global/L/logo.svg",
+]
+},
+{
+name:"Warriors",
+logo:"https://cdn.nba.com/logos/nba/1610612744/global/L/logo.svg",
 players:[
 {name:"Stephen Curry",rating:97,img:"https://cdn.nba.com/headshots/nba/latest/1040x760/201939.png"},
 {name:"Klay Thompson",rating:86,img:"https://cdn.nba.com/headshots/nba/latest/1040x760/202691.png"},
 {name:"Draymond Green",rating:85,img:"https://cdn.nba.com/headshots/nba/latest/1040x760/203110.png"},
 {name:"Andrew Wiggins",rating:83,img:"https://cdn.nba.com/headshots/nba/latest/1040x760/203952.png"},
 {name:"Jonathan Kuminga",rating:84,img:"https://cdn.nba.com/headshots/nba/latest/1040x760/1630228.png"}
-]},
-
-{ name:"Celtics", logo:"https://cdn.nba.com/logos/nba/1610612738/global/L/logo.svg",
+]
+},
+{
+name:"Celtics",
+logo:"https://cdn.nba.com/logos/nba/1610612738/global/L/logo.svg",
 players:[
 {name:"Jayson Tatum",rating:97,img:"https://cdn.nba.com/headshots/nba/latest/1040x760/1628369.png"},
 {name:"Jaylen Brown",rating:95,img:"https://cdn.nba.com/headshots/nba/latest/1040x760/1627759.png"},
 {name:"Kristaps Porzingis",rating:88,img:"https://cdn.nba.com/headshots/nba/latest/1040x760/204001.png"},
 {name:"Jrue Holiday",rating:87,img:"https://cdn.nba.com/headshots/nba/latest/1040x760/201950.png"},
 {name:"Derrick White",rating:86,img:"https://cdn.nba.com/headshots/nba/latest/1040x760/1628401.png"}
-]},
-
-{ name:"Bucks", logo:"https://cdn.nba.com/logos/nba/1610612749/global/L/logo.svg",
-players:[
-{name:"Giannis Antetokounmpo",rating:98,img:"https://cdn.nba.com/headshots/nba/latest/1040x760/203507.png"},
-{name:"Damian Lillard",rating:94,img:"https://cdn.nba.com/headshots/nba/latest/1040x760/203081.png"},
-{name:"Khris Middleton",rating:86,img:"https://cdn.nba.com/headshots/nba/latest/1040x760/203114.png"},
-{name:"Brook Lopez",rating:84,img:"https://cdn.nba.com/headshots/nba/latest/1040x760/201572.png"},
-{name:"Bobby Portis",rating:84,img:"https://cdn.nba.com/headshots/nba/latest/1040x760/1626171.png"}
-]},
-
-{ name:"Suns", logo:"https://cdn.nba.com/logos/nba/1610612756/global/L/logo.svg",
-players:[
-{name:"Kevin Durant",rating:97,img:"https://cdn.nba.com/headshots/nba/latest/1040x760/201142.png"},
-{name:"Devin Booker",rating:96,img:"https://cdn.nba.com/headshots/nba/latest/1040x760/1626164.png"},
-{name:"Bradley Beal",rating:92,img:"https://cdn.nba.com/headshots/nba/latest/1040x760/203078.png"},
-{name:"Jusuf Nurkic",rating:83,img:"https://cdn.nba.com/headshots/nba/latest/1040x760/203994.png"},
-{name:"Grayson Allen",rating:82,img:"https://cdn.nba.com/headshots/nba/latest/1040x760/1628960.png"}
-]},
-
-{ name:"Nuggets", logo:"https://cdn.nba.com/logos/nba/1610612743/global/L/logo.svg",
-players:[
-{name:"Nikola Jokic",rating:99,img:"https://cdn.nba.com/headshots/nba/latest/1040x760/203999.png"},
-{name:"Jamal Murray",rating:92,img:"https://cdn.nba.com/headshots/nba/latest/1040x760/1627750.png"},
-{name:"Michael Porter Jr.",rating:86,img:"https://cdn.nba.com/headshots/nba/latest/1040x760/1629008.png"},
-{name:"Aaron Gordon",rating:85,img:"https://cdn.nba.com/headshots/nba/latest/1040x760/203932.png"},
-{name:"Kentavious Caldwell-Pope",rating:84,img:"https://cdn.nba.com/headshots/nba/latest/1040x760/203484.png"}
-]},
-
-{ name:"Mavericks", logo:"https://cdn.nba.com/logos/nba/1610612742/global/L/logo.svg",
-players:[
-{name:"Luka Doncic",rating:98,img:"https://cdn.nba.com/headshots/nba/latest/1040x760/1629029.png"},
-{name:"Kyrie Irving",rating:94,img:"https://cdn.nba.com/headshots/nba/latest/1040x760/202681.png"},
-{name:"Dereck Lively II",rating:83,img:"https://cdn.nba.com/headshots/nba/latest/1040x760/1641726.png"},
-{name:"Tim Hardaway Jr.",rating:83,img:"https://cdn.nba.com/headshots/nba/latest/1040x760/203501.png"},
-{name:"Grant Williams",rating:82,img:"https://cdn.nba.com/headshots/nba/latest/1040x760/1629684.png"}
-]},
-
-// --- keep going same pattern for all teams ---
+]
+}
 ];
 
-// -------- LEAGUE --------
-let league = [];
+let league = teams;
 let userTeam = null;
+let selectedPlayerIndex = null;
 
-// -------- TEAM SELECT --------
+// --- TEAM SELECT ---
 function showTeams(){
-  league = teams;
-
-  let html = "<div class='grid'>";
-
+  let html="<div class='grid'>";
   league.forEach(t=>{
-    html += `
-      <div class="card" onclick="selectTeam('${t.name}')">
-        <img src="${t.logo}">
-        <div><b>${t.name}</b></div>
-      </div>
-    `;
+    html+=`
+    <div class="card" onclick="selectTeam('${t.name}')">
+      <img src="${t.logo}">
+      <div>${t.name}</div>
+    </div>`;
   });
-
-  html += "</div>";
-  document.getElementById("output").innerHTML = html;
+  html+="</div>";
+  output.innerHTML=html;
 }
 
 function selectTeam(name){
-  userTeam = league.find(t => t.name === name);
+  userTeam = league.find(t=>t.name===name);
   updateUI();
 }
 
-// -------- UI --------
+// --- UI ---
 function updateUI(){
   if(!userTeam) return;
-
-  document.getElementById("teamName").innerHTML = `
-    <img src="${userTeam.logo}" style="width:50px;">
-    ${userTeam.name}
-  `;
-
-  document.getElementById("record").innerText =
-    (userTeam.wins || 0) + "-" + (userTeam.losses || 0);
+  teamName.innerHTML=`<img src="${userTeam.logo}"> ${userTeam.name}`;
+  record.innerText=(userTeam.wins||0)+"-"+(userTeam.losses||0);
 }
 
-// -------- ROSTER --------
+// --- ROSTER ---
 function viewRoster(){
   if(!userTeam) return;
-
-  let html = "<div class='grid'>";
-
+  let html="<div class='grid'>";
   userTeam.players.forEach(p=>{
-    html += `
-      <div class="card">
-        <img src="${p.img}">
-        <div><b>${p.name}</b></div>
-        <div class="rating">${p.rating}</div>
-      </div>
-    `;
+    html+=`
+    <div class="card">
+      <img src="${p.img}">
+      <div>${p.name}</div>
+      <div class="rating">${p.rating}</div>
+    </div>`;
   });
-
-  html += "</div>";
-  document.getElementById("output").innerHTML = html;
+  html+="</div>";
+  output.innerHTML=html;
 }
 
-// -------- SIM GAME --------
+// --- SIM ---
 function teamRating(team){
   return team.players.reduce((a,b)=>a+b.rating,0)/team.players.length;
 }
 
-function simGame(){
+function simSeason(){
+  league.forEach(t=>{t.wins=0;t.losses=0;});
+  for(let i=0;i<50;i++){
+    league.forEach(team=>{
+      let opp=league[Math.floor(Math.random()*league.length)];
+      if(opp===team) return;
+      if(teamRating(team)+Math.random()*10 > teamRating(opp)+Math.random()*10){
+        team.wins++;
+      } else team.losses++;
+    });
+  }
+  alert("Season done!");
+  showStandings();
+}
+
+// --- STANDINGS ---
+function showStandings(){
+  let sorted=[...league].sort((a,b)=>(b.wins||0)-(a.wins||0));
+  let html="<div class='grid'>";
+  sorted.forEach(t=>{
+    html+=`
+    <div class="card">
+      <img src="${t.logo}">
+      <div>${t.name}</div>
+      <div>${t.wins||0}-${t.losses||0}</div>
+    </div>`;
+  });
+  html+="</div>";
+  output.innerHTML=html;
+}
+
+// --- PLAYOFFS ---
+function showPlayoffs(){
+  let sorted=[...league].sort((a,b)=>(b.wins||0)-(a.wins||0)).slice(0,8);
+  let html="<div class='grid'>";
+  sorted.forEach(t=>{
+    html+=`
+    <div class="card">
+      <img src="${t.logo}">
+      <div>${t.name}</div>
+    </div>`;
+  });
+  html+="</div>";
+  output.innerHTML=html;
+}
+
+// --- TRADES ---
+function tradeMenu(){
   if(!userTeam) return;
+  let html="<div class='grid'>";
+  userTeam.players.forEach((p,i)=>{
+    html+=`
+    <div class="card" onclick="selectTradePlayer(${i})">
+      <img src="${p.img}">
+      <div>${p.name}</div>
+    </div>`;
+  });
+  html+="</div>";
+  output.innerHTML=html;
+}
 
-  let opp = league[Math.floor(Math.random()*league.length)];
-  if(opp === userTeam) return simGame();
+function selectTradePlayer(i){
+  selectedPlayerIndex=i;
+  let html="<div class='grid'>";
+  league.forEach(t=>{
+    if(t!==userTeam){
+      html+=`
+      <div class="card" onclick="selectTradeTeam('${t.name}')">
+        <img src="${t.logo}">
+        <div>${t.name}</div>
+      </div>`;
+    }
+  });
+  html+="</div>";
+  output.innerHTML=html;
+}
 
-  let scoreA = teamRating(userTeam) + Math.random()*10;
-  let scoreB = teamRating(opp) + Math.random()*10;
+function selectTradeTeam(name){
+  let t=league.find(x=>x.name===name);
+  let html="<div class='grid'>";
+  t.players.forEach((p,i)=>{
+    html+=`
+    <div class="card" onclick="makeTrade('${name}',${i})">
+      <img src="${p.img}">
+      <div>${p.name}</div>
+    </div>`;
+  });
+  html+="</div>";
+  output.innerHTML=html;
+}
 
-  if(scoreA > scoreB){
-    userTeam.wins = (userTeam.wins || 0) + 1;
-  } else {
-    userTeam.losses = (userTeam.losses || 0) + 1;
+function makeTrade(name,i){
+  let t=league.find(x=>x.name===name);
+  let my=userTeam.players[selectedPlayerIndex];
+  let their=t.players[i];
+
+  if(their.rating > my.rating+3){
+    alert("Trade rejected");
+    return;
   }
 
-  updateUI();
+  userTeam.players[selectedPlayerIndex]=their;
+  t.players[i]=my;
+
+  alert("Trade accepted");
+  viewRoster();
 }
 
 </script>
 
 </body>
 </html>
-function showStandings(){
-  let sorted = [...league].sort((a,b)=>
-    (b.wins||0)-(a.wins||0)
-  );
-
-  let html = "<h2>Standings</h2><div class='grid'>";
-
-  sorted.forEach(t=>{
-    html += `
-      <div class="card">
-        <img src="${t.logo}">
-        <div>${t.name}</div>
-        <div>${t.wins||0} - ${t.losses||0}</div>
-      </div>
-    `;
-  });
-
-  html += "</div>";
-  document.getElementById("output").innerHTML = html;
-}
-function showPlayoffs(){
-  let sorted = [...league].sort((a,b)=>
-    (b.wins||0)-(a.wins||0)
-  );
-
-  let top8 = sorted.slice(0,8);
-
-  let html = "<h2>Playoffs</h2><div class='grid'>";
-
-  top8.forEach(t=>{
-    html += `
-      <div class="card">
-        <img src="${t.logo}">
-        <div>${t.name}</div>
-      </div>
-    `;
-  });
-
-  html += "</div>";
-  document.getElementById("output").innerHTML = html;
-}
-function simSeason(){
-  for(let i=0;i<50;i++){
-    league.forEach(team=>{
-      let opp = league[Math.floor(Math.random()*league.length)];
-      if(opp===team) return;
-
-      let scoreA = teamRating(team)+Math.random()*10;
-      let scoreB = teamRating(opp)+Math.random()*10;
-
-      if(scoreA>scoreB){
-        team.wins = (team.wins||0)+1;
-      } else {
-        team.losses = (team.losses||0)+1;
-      }
-    });
-  }
-
-  alert("Season simulated!");
-  showStandings();
-}
-    function makeTrade(teamName, playerIndex){
-  let otherTeam = league.find(t=>t.name===teamName);
-
-  let myPlayer = userTeam.players[selectedPlayerIndex];
-  let theirPlayer = otherTeam.players[playerIndex];
-
-  // AI decision
-  if(theirPlayer.rating > myPlayer.rating + 3){
-    alert("Trade rejected!");
-    return;
-  }
-
-  // accept
-  userTeam.players[selectedPlayerIndex] = theirPlayer;
-  otherTeam.players[playerIndex] = myPlayer;
-
-  alert("Trade accepted!");
-  viewRoster();
-}

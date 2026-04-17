@@ -67,45 +67,73 @@
 <script>
 
 // --- TEAMS (sample but expandable) ---
-let teams = [
-{
-name:"Lakers",
-logo:"https://cdn.nba.com/logos/nba/1610612747/global/L/logo.svg",
-players:[
-{name:"LeBron James",rating:96,img:"https://cdn.nba.com/headshots/nba/latest/1040x760/2544.png"},
-{name:"Anthony Davis",rating:92,img:"https://cdn.nba.com/headshots/nba/latest/1040x760/203076.png"},
-{name:"Austin Reaves",rating:86,img:"https://cdn.nba.com/headshots/nba/latest/1040x760/1630559.png"},
-{name:"Rui Hachimura",rating:82,img:"https://cdn.nba.com/headshots/nba/latest/1040x760/1629060.png"},
-{name:"D'Angelo Russell",rating:84,img:"https://cdn.nba.com/headshots/nba/latest/1040x760/1626156.png"}
-]
-},
-{
-name:"Warriors",
-logo:"https://cdn.nba.com/logos/nba/1610612744/global/L/logo.svg",
-players:[
-{name:"Stephen Curry",rating:97,img:"https://cdn.nba.com/headshots/nba/latest/1040x760/201939.png"},
-{name:"Klay Thompson",rating:86,img:"https://cdn.nba.com/headshots/nba/latest/1040x760/202691.png"},
-{name:"Draymond Green",rating:85,img:"https://cdn.nba.com/headshots/nba/latest/1040x760/203110.png"},
-{name:"Andrew Wiggins",rating:83,img:"https://cdn.nba.com/headshots/nba/latest/1040x760/203952.png"},
-{name:"Jonathan Kuminga",rating:84,img:"https://cdn.nba.com/headshots/nba/latest/1040x760/1630228.png"}
-]
-},
-{
-name:"Celtics",
-logo:"https://cdn.nba.com/logos/nba/1610612738/global/L/logo.svg",
-players:[
-{name:"Jayson Tatum",rating:97,img:"https://cdn.nba.com/headshots/nba/latest/1040x760/1628369.png"},
-{name:"Jaylen Brown",rating:95,img:"https://cdn.nba.com/headshots/nba/latest/1040x760/1627759.png"},
-{name:"Kristaps Porzingis",rating:88,img:"https://cdn.nba.com/headshots/nba/latest/1040x760/204001.png"},
-{name:"Jrue Holiday",rating:87,img:"https://cdn.nba.com/headshots/nba/latest/1040x760/201950.png"},
-{name:"Derrick White",rating:86,img:"https://cdn.nba.com/headshots/nba/latest/1040x760/1628401.png"}
-]
-}
+let teamList = [
+"Lakers","Warriors","Celtics","Bucks","Suns","Nuggets","Mavericks",
+"Heat","Knicks","76ers","Raptors","Bulls","Cavaliers","Pacers",
+"Magic","Hawks","Hornets","Pistons","Nets","Spurs","Rockets",
+"Grizzlies","Pelicans","Jazz","Thunder","Kings","Clippers",
+"Timberwolves","Blazers"
 ];
 
-let league = teams;
-let userTeam = null;
-let selectedPlayerIndex = null;
+let logos = {
+"Lakers":"https://cdn.nba.com/logos/nba/1610612747/global/L/logo.svg",
+"Warriors":"https://cdn.nba.com/logos/nba/1610612744/global/L/logo.svg",
+"Celtics":"https://cdn.nba.com/logos/nba/1610612738/global/L/logo.svg",
+"Bucks":"https://cdn.nba.com/logos/nba/1610612749/global/L/logo.svg",
+"Suns":"https://cdn.nba.com/logos/nba/1610612756/global/L/logo.svg",
+"Nuggets":"https://cdn.nba.com/logos/nba/1610612743/global/L/logo.svg",
+"Mavericks":"https://cdn.nba.com/logos/nba/1610612742/global/L/logo.svg"
+};
+
+// star players (real)
+let stars = [
+{ name:"LeBron James", rating:96, img:"https://cdn.nba.com/headshots/nba/latest/1040x760/2544.png"},
+{ name:"Stephen Curry", rating:97, img:"https://cdn.nba.com/headshots/nba/latest/1040x760/201939.png"},
+{ name:"Jayson Tatum", rating:97, img:"https://cdn.nba.com/headshots/nba/latest/1040x760/1628369.png"},
+{ name:"Giannis Antetokounmpo", rating:98, img:"https://cdn.nba.com/headshots/nba/latest/1040x760/203507.png"},
+{ name:"Kevin Durant", rating:97, img:"https://cdn.nba.com/headshots/nba/latest/1040x760/201142.png"},
+{ name:"Nikola Jokic", rating:99, img:"https://cdn.nba.com/headshots/nba/latest/1040x760/203999.png"},
+{ name:"Luka Doncic", rating:98, img:"https://cdn.nba.com/headshots/nba/latest/1040x760/1629029.png"}
+];
+
+// generate role players
+function genPlayer(){
+  return {
+    name:"Player " + Math.floor(Math.random()*1000),
+    rating:Math.floor(Math.random()*15)+75,
+    img:"https://api.dicebear.com/7.x/avataaars/svg?seed="+Math.random(),
+    stats:{
+      ppg:(Math.random()*20+5).toFixed(1),
+      rpg:(Math.random()*10).toFixed(1),
+      apg:(Math.random()*8).toFixed(1)
+    }
+  };
+}
+
+let teams = teamList.map((name,i)=>{
+  let players=[];
+
+  // add 1 star if available
+  if(stars[i]){
+    players.push({
+      ...stars[i],
+      stats:{ ppg:28, rpg:8, apg:7 }
+    });
+  }
+
+  // fill rest
+  while(players.length<5){
+    players.push(genPlayer());
+  }
+
+  return {
+    name,
+    logo: logos[name] || "https://cdn.nba.com/logos/nba/1610612737/global/L/logo.svg",
+    players,
+    wins:0,
+    losses:0
+  };
+});
 
 // --- TEAM SELECT ---
 function showTeams(){

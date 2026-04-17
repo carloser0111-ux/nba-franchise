@@ -3,47 +3,28 @@
 <head>
   <title>NBA MyLEAGUE</title>
   <style>
-    body {
-      background: linear-gradient(135deg,#0a0a0a,#1a1a1a);
-      color:white;
-      font-family:Arial;
-      text-align:center;
-    }
-
-    h1 { color: gold; }
+    body { background:#111; color:white; font-family:Arial; text-align:center; }
+    h1 { color:gold; }
 
     .menu button {
-      padding:10px 15px;
-      margin:5px;
-      border:none;
-      border-radius:8px;
-      background:gold;
-      font-weight:bold;
-      cursor:pointer;
+      padding:10px; margin:5px; border:none;
+      border-radius:8px; background:gold;
+      cursor:pointer; font-weight:bold;
     }
 
     .grid {
-      display:flex;
-      flex-wrap:wrap;
-      justify-content:center;
-      gap:15px;
+      display:flex; flex-wrap:wrap;
+      justify-content:center; gap:15px;
       margin-top:20px;
     }
 
     .card {
-      background:#1c1c1c;
-      padding:10px;
-      width:150px;
-      border-radius:12px;
-      box-shadow:0 0 10px rgba(255,215,0,0.3);
-      cursor:pointer;
+      background:#1c1c1c; padding:10px;
+      width:160px; border-radius:10px;
     }
 
-    .card:hover { transform:scale(1.05); }
-
     img { width:80px; border-radius:8px; }
-
-    .rating { color:gold; font-weight:bold; }
+    .rating { color:gold; }
   </style>
 </head>
 <body>
@@ -56,97 +37,57 @@
   <button onclick="showStandings()">Standings</button>
   <button onclick="showPlayoffs()">Playoffs</button>
   <button onclick="tradeMenu()">Trade</button>
-  <button onclick="simSeason()">Sim Season</button>
+  <button onclick="showNextGame()">Next Game</button>
+  <button onclick="showHistory()">Game Log</button>
+  <button onclick="saveGame()">Save</button>
+  <button onclick="loadGame()">Load</button>
 </div>
 
 <h2 id="teamName"></h2>
 <h3 id="record"></h3>
-
 <div id="output"></div>
 
 <script>
 
-// --- TEAMS (sample but expandable) ---
-let teamList = [
-"Lakers","Warriors","Celtics","Bucks","Suns","Nuggets","Mavericks",
-"Heat","Knicks","76ers","Raptors","Bulls","Cavaliers","Pacers",
-"Magic","Hawks","Hornets","Pistons","Nets","Spurs","Rockets",
-"Grizzlies","Pelicans","Jazz","Thunder","Kings","Clippers",
-"Timberwolves","Blazers"
-];
+// --- TEAMS ---
+let teamNames = ["Lakers","Warriors","Celtics","Bucks","Suns","Nuggets","Mavericks","Heat"];
 
-let logos = {
-"Lakers":"https://cdn.nba.com/logos/nba/1610612747/global/L/logo.svg",
-"Warriors":"https://cdn.nba.com/logos/nba/1610612744/global/L/logo.svg",
-"Celtics":"https://cdn.nba.com/logos/nba/1610612738/global/L/logo.svg",
-"Bucks":"https://cdn.nba.com/logos/nba/1610612749/global/L/logo.svg",
-"Suns":"https://cdn.nba.com/logos/nba/1610612756/global/L/logo.svg",
-"Nuggets":"https://cdn.nba.com/logos/nba/1610612743/global/L/logo.svg",
-"Mavericks":"https://cdn.nba.com/logos/nba/1610612742/global/L/logo.svg"
-};
-
-// star players (real)
 let stars = [
-{ name:"LeBron James", rating:96, img:"https://cdn.nba.com/headshots/nba/latest/1040x760/2544.png"},
-{ name:"Stephen Curry", rating:97, img:"https://cdn.nba.com/headshots/nba/latest/1040x760/201939.png"},
-{ name:"Jayson Tatum", rating:97, img:"https://cdn.nba.com/headshots/nba/latest/1040x760/1628369.png"},
-{ name:"Giannis Antetokounmpo", rating:98, img:"https://cdn.nba.com/headshots/nba/latest/1040x760/203507.png"},
-{ name:"Kevin Durant", rating:97, img:"https://cdn.nba.com/headshots/nba/latest/1040x760/201142.png"},
-{ name:"Nikola Jokic", rating:99, img:"https://cdn.nba.com/headshots/nba/latest/1040x760/203999.png"},
-{ name:"Luka Doncic", rating:98, img:"https://cdn.nba.com/headshots/nba/latest/1040x760/1629029.png"}
+{ name:"LeBron James", rating:96 },
+{ name:"Stephen Curry", rating:97 },
+{ name:"Jayson Tatum", rating:97 },
+{ name:"Giannis Antetokounmpo", rating:98 },
+{ name:"Kevin Durant", rating:97 },
+{ name:"Nikola Jokic", rating:99 }
 ];
 
-// generate role players
 function genPlayer(){
   return {
-    name:"Player " + Math.floor(Math.random()*1000),
-    rating:Math.floor(Math.random()*15)+75,
-    img:"https://api.dicebear.com/7.x/avataaars/svg?seed="+Math.random(),
-    stats:{
-      ppg:(Math.random()*20+5).toFixed(1),
-      rpg:(Math.random()*10).toFixed(1),
-      apg:(Math.random()*8).toFixed(1)
-    }
+    name:"Role Player",
+    rating: Math.floor(Math.random()*10)+78,
+    stats:{ ppg:10, rpg:5, apg:3 }
   };
 }
 
-let teams = teamList.map((name,i)=>{
+let league = teamNames.map((name,i)=>{
   let players=[];
+  players.push({...stars[i%stars.length], stats:{ppg:28,rpg:8,apg:7}});
+  players.push({...stars[(i+1)%stars.length], stats:{ppg:24,rpg:6,apg:5}});
+  while(players.length<5) players.push(genPlayer());
 
-  // add 1 star if available
-  if(stars[i]){
-    players.push({
-      ...stars[i],
-      stats:{ ppg:28, rpg:8, apg:7 }
-    });
-  }
-
-  // fill rest
-  while(players.length<5){
-    players.push(genPlayer());
-  }
-
-  return {
-    name,
-    logo: logos[name] || "https://cdn.nba.com/logos/nba/1610612737/global/L/logo.svg",
-    players,
-    wins:0,
-    losses:0
-  };
+  return { name, players, wins:0, losses:0 };
 });
 
-// --- TEAM SELECT ---
+let userTeam=null;
+let selectedPlayerIndex=null;
+let currentGame=null;
+let history=[];
+
+// --- UI ---
 function showTeams(){
-  let html="<div class='grid'>";
-  league.forEach(t=>{
-    html+=`
-    <div class="card" onclick="selectTeam('${t.name}')">
-      <img src="${t.logo}">
-      <div>${t.name}</div>
-    </div>`;
-  });
-  html+="</div>";
-  output.innerHTML=html;
+  output.innerHTML = league.map(t=>
+    `<div class="card" onclick="selectTeam('${t.name}')">${t.name}</div>`
+  ).join("");
 }
 
 function selectTeam(name){
@@ -154,123 +95,105 @@ function selectTeam(name){
   updateUI();
 }
 
-// --- UI ---
 function updateUI(){
   if(!userTeam) return;
-  teamName.innerHTML=`<img src="${userTeam.logo}"> ${userTeam.name}`;
-  record.innerText=(userTeam.wins||0)+"-"+(userTeam.losses||0);
+  teamName.innerText=userTeam.name;
+  record.innerText=userTeam.wins+"-"+userTeam.losses;
 }
 
 // --- ROSTER ---
 function viewRoster(){
   if(!userTeam) return;
-  let html="<div class='grid'>";
-  userTeam.players.forEach(p=>{
-    html+=`
+  output.innerHTML = userTeam.players.map(p=>`
     <div class="card">
-      <img src="${p.img}">
       <div>${p.name}</div>
       <div class="rating">${p.rating}</div>
-    </div>`;
-  });
-  html+="</div>";
-  output.innerHTML=html;
-}
-
-// --- SIM ---
-function teamRating(team){
-  return team.players.reduce((a,b)=>a+b.rating,0)/team.players.length;
-}
-
-function simSeason(){
-  league.forEach(t=>{t.wins=0;t.losses=0;});
-  for(let i=0;i<50;i++){
-    league.forEach(team=>{
-      let opp=league[Math.floor(Math.random()*league.length)];
-      if(opp===team) return;
-      if(teamRating(team)+Math.random()*10 > teamRating(opp)+Math.random()*10){
-        team.wins++;
-      } else team.losses++;
-    });
-  }
-  alert("Season done!");
-  showStandings();
+      <div>${p.stats.ppg} PPG</div>
+    </div>
+  `).join("");
 }
 
 // --- STANDINGS ---
 function showStandings(){
-  let sorted=[...league].sort((a,b)=>(b.wins||0)-(a.wins||0));
-  let html="<div class='grid'>";
-  sorted.forEach(t=>{
-    html+=`
-    <div class="card">
-      <img src="${t.logo}">
-      <div>${t.name}</div>
-      <div>${t.wins||0}-${t.losses||0}</div>
-    </div>`;
-  });
-  html+="</div>";
-  output.innerHTML=html;
+  let sorted=[...league].sort((a,b)=>b.wins-a.wins);
+  output.innerHTML = sorted.map(t=>
+    `<div class="card">${t.name}<br>${t.wins}-${t.losses}</div>`
+  ).join("");
 }
 
 // --- PLAYOFFS ---
 function showPlayoffs(){
-  let sorted=[...league].sort((a,b)=>(b.wins||0)-(a.wins||0)).slice(0,8);
-  let html="<div class='grid'>";
-  sorted.forEach(t=>{
-    html+=`
-    <div class="card">
-      <img src="${t.logo}">
-      <div>${t.name}</div>
-    </div>`;
-  });
-  html+="</div>";
-  output.innerHTML=html;
+  let top=[...league].sort((a,b)=>b.wins-a.wins).slice(0,4);
+  output.innerHTML = top.map(t=>`<div class="card">${t.name}</div>`).join("");
+}
+
+// --- NEXT GAME ---
+function showNextGame(){
+  let opp = league[Math.floor(Math.random()*league.length)];
+  if(opp===userTeam) return showNextGame();
+
+  currentGame={home:userTeam,away:opp};
+
+  output.innerHTML=`
+    <h2>${userTeam.name} vs ${opp.name}</h2>
+    <button onclick="playGame()">Play</button>
+  `;
+}
+
+// --- GAME SIM ---
+function teamRating(t){
+  return t.players.reduce((a,b)=>a+b.rating,0)/t.players.length;
+}
+
+function playGame(){
+  let a=currentGame.home;
+  let b=currentGame.away;
+
+  let sA=Math.floor(teamRating(a)+Math.random()*20);
+  let sB=Math.floor(teamRating(b)+Math.random()*20);
+
+  if(sA>sB){a.wins++;b.losses++;} else {b.wins++;a.losses++;}
+
+  let game={
+    a:a.name,b:b.name,sA,sB
+  };
+
+  history.push(game);
+
+  output.innerHTML=`
+    <h2>${a.name} ${sA} - ${sB} ${b.name}</h2>
+  `;
+
+  updateUI();
+}
+
+// --- HISTORY ---
+function showHistory(){
+  output.innerHTML = history.map(g=>
+    `<div class="card">${g.a} ${g.sA} - ${g.sB} ${g.b}</div>`
+  ).join("");
 }
 
 // --- TRADES ---
 function tradeMenu(){
-  if(!userTeam) return;
-  let html="<div class='grid'>";
-  userTeam.players.forEach((p,i)=>{
-    html+=`
-    <div class="card" onclick="selectTradePlayer(${i})">
-      <img src="${p.img}">
-      <div>${p.name}</div>
-    </div>`;
-  });
-  html+="</div>";
-  output.innerHTML=html;
+  output.innerHTML = userTeam.players.map((p,i)=>
+    `<div class="card" onclick="selectTradePlayer(${i})">${p.name}</div>`
+  ).join("");
 }
 
 function selectTradePlayer(i){
   selectedPlayerIndex=i;
-  let html="<div class='grid'>";
-  league.forEach(t=>{
-    if(t!==userTeam){
-      html+=`
-      <div class="card" onclick="selectTradeTeam('${t.name}')">
-        <img src="${t.logo}">
-        <div>${t.name}</div>
-      </div>`;
-    }
-  });
-  html+="</div>";
-  output.innerHTML=html;
+  output.innerHTML = league.map(t=>{
+    if(t!==userTeam)
+      return `<div class="card" onclick="selectTradeTeam('${t.name}')">${t.name}</div>`;
+  }).join("");
 }
 
 function selectTradeTeam(name){
   let t=league.find(x=>x.name===name);
-  let html="<div class='grid'>";
-  t.players.forEach((p,i)=>{
-    html+=`
-    <div class="card" onclick="makeTrade('${name}',${i})">
-      <img src="${p.img}">
-      <div>${p.name}</div>
-    </div>`;
-  });
-  html+="</div>";
-  output.innerHTML=html;
+  output.innerHTML = t.players.map((p,i)=>
+    `<div class="card" onclick="makeTrade('${name}',${i})">${p.name}</div>`
+  ).join("");
 }
 
 function makeTrade(name,i){
@@ -278,7 +201,7 @@ function makeTrade(name,i){
   let my=userTeam.players[selectedPlayerIndex];
   let their=t.players[i];
 
-  if(their.rating > my.rating+3){
+  if(their.rating>my.rating+3){
     alert("Trade rejected");
     return;
   }
@@ -286,8 +209,21 @@ function makeTrade(name,i){
   userTeam.players[selectedPlayerIndex]=their;
   t.players[i]=my;
 
-  alert("Trade accepted");
-  viewRoster();
+  alert("Trade done");
+}
+
+// --- SAVE / LOAD ---
+function saveGame(){
+  localStorage.setItem("league",JSON.stringify(league));
+  alert("Saved!");
+}
+
+function loadGame(){
+  let data=localStorage.getItem("league");
+  if(data){
+    league=JSON.parse(data);
+    alert("Loaded!");
+  }
 }
 
 </script>

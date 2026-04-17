@@ -197,3 +197,83 @@ function simGame(){
 
 </body>
 </html>
+function showStandings(){
+  let sorted = [...league].sort((a,b)=>
+    (b.wins||0)-(a.wins||0)
+  );
+
+  let html = "<h2>Standings</h2><div class='grid'>";
+
+  sorted.forEach(t=>{
+    html += `
+      <div class="card">
+        <img src="${t.logo}">
+        <div>${t.name}</div>
+        <div>${t.wins||0} - ${t.losses||0}</div>
+      </div>
+    `;
+  });
+
+  html += "</div>";
+  document.getElementById("output").innerHTML = html;
+}
+function showPlayoffs(){
+  let sorted = [...league].sort((a,b)=>
+    (b.wins||0)-(a.wins||0)
+  );
+
+  let top8 = sorted.slice(0,8);
+
+  let html = "<h2>Playoffs</h2><div class='grid'>";
+
+  top8.forEach(t=>{
+    html += `
+      <div class="card">
+        <img src="${t.logo}">
+        <div>${t.name}</div>
+      </div>
+    `;
+  });
+
+  html += "</div>";
+  document.getElementById("output").innerHTML = html;
+}
+function simSeason(){
+  for(let i=0;i<50;i++){
+    league.forEach(team=>{
+      let opp = league[Math.floor(Math.random()*league.length)];
+      if(opp===team) return;
+
+      let scoreA = teamRating(team)+Math.random()*10;
+      let scoreB = teamRating(opp)+Math.random()*10;
+
+      if(scoreA>scoreB){
+        team.wins = (team.wins||0)+1;
+      } else {
+        team.losses = (team.losses||0)+1;
+      }
+    });
+  }
+
+  alert("Season simulated!");
+  showStandings();
+}
+    function makeTrade(teamName, playerIndex){
+  let otherTeam = league.find(t=>t.name===teamName);
+
+  let myPlayer = userTeam.players[selectedPlayerIndex];
+  let theirPlayer = otherTeam.players[playerIndex];
+
+  // AI decision
+  if(theirPlayer.rating > myPlayer.rating + 3){
+    alert("Trade rejected!");
+    return;
+  }
+
+  // accept
+  userTeam.players[selectedPlayerIndex] = theirPlayer;
+  otherTeam.players[playerIndex] = myPlayer;
+
+  alert("Trade accepted!");
+  viewRoster();
+}
